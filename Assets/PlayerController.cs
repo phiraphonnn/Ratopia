@@ -8,7 +8,6 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private float touchDragSpeed = 1.0f;
-    
 
     private InputAction touchPressAction;
     private InputAction touchPositionAction;
@@ -17,7 +16,7 @@ public class PlayerController : MonoBehaviour
     private Camera mainCamera;
     private RectTransform canvasRectTransform;
 
-    private GameObject currentDraggedObject;
+    public GameObject currentDraggedObject;
     private Vector2 touchOffset;
 
     private void Awake()
@@ -101,8 +100,17 @@ public class PlayerController : MonoBehaviour
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvasRectTransform, position, mainCamera, out Vector2 localPoint);
 
-            // Set the anchored position of the UI element with the touch offset
-            currentDraggedObject.GetComponent<RectTransform>().anchoredPosition = localPoint + touchOffset;
+            // Set the anchored position of the UI element with the touch offset, applying drag speed
+            Vector2 newPosition = localPoint + touchOffset;
+            Vector2 deltaPosition = newPosition - (Vector2)currentDraggedObject.GetComponent<RectTransform>().anchoredPosition;
+            Vector2 moveDirection = deltaPosition.normalized;
+            float moveDistance = deltaPosition.magnitude;
+
+            // Apply drag speed here
+            float dragFactor = Mathf.Min(1.0f, touchDragSpeed * Time.deltaTime);
+            Vector2 finalPosition = (Vector2)currentDraggedObject.GetComponent<RectTransform>().anchoredPosition + moveDirection * moveDistance * dragFactor;
+
+            currentDraggedObject.GetComponent<RectTransform>().anchoredPosition = finalPosition;
         }
     }
 }
