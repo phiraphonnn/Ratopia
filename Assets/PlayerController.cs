@@ -8,12 +8,11 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private float touchDragSpeed = 1.0f;
-
+    [SerializeField] private Transform SpawnCardPosition;
     private InputAction touchPressAction;
     private InputAction touchPositionAction;
     private InputActionMap touchmaMap;
 
-    private Camera mainCamera;
     private RectTransform canvasRectTransform;
 
     public GameObject currentDraggedObject;
@@ -24,8 +23,6 @@ public class PlayerController : MonoBehaviour
         touchPressAction = _playerInput.actions["Touchpress"];
         touchPositionAction = _playerInput.actions["TouchPosition"];
         touchmaMap = _playerInput.actions.FindActionMap("TouchSwapLR");
-
-        mainCamera = Camera.main;
     }
 
     private void OnEnable()
@@ -69,16 +66,15 @@ public class PlayerController : MonoBehaviour
             if (results.Count > 0)
             {
                 GameObject clickedObject = results[0].gameObject;
-
-                // Check if the clicked UI object has the "card" tag
-                if (clickedObject.CompareTag("card"))
+                
+                if (clickedObject.CompareTag("card") && LayerMask.LayerToName(clickedObject.layer) == "card")
                 {
                     currentDraggedObject = clickedObject;
 
                     // Calculate the touch offset relative to the UI element's position
                     Vector2 localPoint;
                     RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                        canvasRectTransform, position, mainCamera, out localPoint);
+                        canvasRectTransform, position, null, out localPoint);
                     touchOffset = (Vector2)currentDraggedObject.transform.localPosition - localPoint;
                 }
             }
@@ -97,8 +93,9 @@ public class PlayerController : MonoBehaviour
             Vector2 position = touchPositionAction.ReadValue<Vector2>();
 
             // Convert the screen position to canvas space
+            Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                canvasRectTransform, position, mainCamera, out Vector2 localPoint);
+                canvasRectTransform, position, null, out localPoint);
 
             // Set the anchored position of the UI element with the touch offset, applying drag speed
             Vector2 newPosition = localPoint + touchOffset;
