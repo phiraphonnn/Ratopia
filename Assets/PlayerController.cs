@@ -98,10 +98,10 @@ public class PlayerController : MonoBehaviour
         if (currentDraggedObject != null)
         {
             Vector2 position = touchPositionAction.ReadValue<Vector2>();
-            Vector2 localPoint;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, position, null, out localPoint);
-            
-            Vector2 newPosition = localPoint + touchOffset;
+         
+            Debug.LogWarning(position);
+            Debug.LogWarning(touchOffset);
+            Vector2 newPosition = position;
             Vector2 deltaPosition = newPosition - (Vector2)currentDraggedObject.GetComponent<RectTransform>().anchoredPosition;
             float moveDistance = deltaPosition.x;  // Only consider the X component
 
