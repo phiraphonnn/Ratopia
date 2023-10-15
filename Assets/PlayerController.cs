@@ -73,8 +73,8 @@ public class PlayerController : MonoBehaviour
 
                     // Calculate the touch offset relative to the UI element's position
                     Vector2 localPoint;
-                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                        canvasRectTransform, position, null, out localPoint);
+                    Debug.LogWarning("kuy");
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, position, null, out localPoint);
                     touchOffset = (Vector2)currentDraggedObject.transform.localPosition - localPoint;
                 }
             }
@@ -83,31 +83,34 @@ public class PlayerController : MonoBehaviour
 
     private void TouchReleased(InputAction.CallbackContext context)
     {
-        currentDraggedObject = null;
+        if (currentDraggedObject != null)
+        {
+            // Set the card's position to the original position
+            currentDraggedObject.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
+
+            currentDraggedObject = null;
+        }
     }
+
 
     private void Update()
     {
         if (currentDraggedObject != null)
         {
             Vector2 position = touchPositionAction.ReadValue<Vector2>();
-
-            // Convert the screen position to canvas space
             Vector2 localPoint;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                canvasRectTransform, position, null, out localPoint);
-
-            // Set the anchored position of the UI element with the touch offset, applying drag speed
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, position, null, out localPoint);
+            
             Vector2 newPosition = localPoint + touchOffset;
             Vector2 deltaPosition = newPosition - (Vector2)currentDraggedObject.GetComponent<RectTransform>().anchoredPosition;
-            Vector2 moveDirection = deltaPosition.normalized;
-            float moveDistance = deltaPosition.magnitude;
+            float moveDistance = deltaPosition.x;  // Only consider the X component
 
             // Apply drag speed here
             float dragFactor = Mathf.Min(1.0f, touchDragSpeed * Time.deltaTime);
-            Vector2 finalPosition = (Vector2)currentDraggedObject.GetComponent<RectTransform>().anchoredPosition + moveDirection * moveDistance * dragFactor;
-
+            Vector2 finalPosition = (Vector2)currentDraggedObject.GetComponent<RectTransform>().anchoredPosition; 
+            finalPosition.x += moveDistance * dragFactor;  // Update only the X position
             currentDraggedObject.GetComponent<RectTransform>().anchoredPosition = finalPosition;
         }
     }
+
 }
